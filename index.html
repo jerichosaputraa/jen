@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Gift For You</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; cursor: default; }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+        .handwriting { font-family: 'Caveat', cursive; }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Reveal Animation */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin-slow 4s linear infinite; }
+
+        /* Magic Cursor */
+        .magic-cursor {
+            position: fixed; pointer-events: none;
+            width: 10px; height: 10px; background: #fda4af;
+            border-radius: 50%; z-index: 9999;
+            box-shadow: 0 0 10px 2px #fda4af;
+            animation: cursorFade 1s forwards;
+        }
+        @keyframes cursorFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2) translateY(20px); }
+        }
+
+        /* Particle Hearts */
+        .heart-particle { position: fixed; pointer-events: none; animation: floatUp 2s ease-out forwards; z-index: 9999; }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5) rotate(20deg); }
+        }
+        
+        /* Fireflies */
+        .firefly {
+            position: absolute; width: 4px; height: 4px; background: #fda4af;
+            border-radius: 50%; pointer-events: none;
+            box-shadow: 0 0 10px 2px #fda4af;
+            animation: drift 4s infinite alternate ease-in-out;
+        }
+        @keyframes drift {
+            0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.5; }
+            100% { transform: translateY(-20px) translateX(20px) scale(1.5); opacity: 1; }
+        }
+
+        /* Timeline Dot */
+        .timeline-dot::before {
+            content: '';
+            position: absolute; left: -25px; top: 6px;
+            width: 12px; height: 12px; background: #fb7185;
+            border-radius: 50%; border: 3px solid #ffe4e6;
+            box-shadow: 0 0 0 4px white;
+        }
+
+        /* Ticket Design */
+        .ticket-shape {
+            background: #ffffff;
+            border-radius: 16px;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .ticket-shape:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .ticket-divider {
+            border-top: 2px dashed #e2e8f0;
+            margin: 1rem 0;
+            position: relative;
+        }
+        .ticket-divider::before, .ticket-divider::after {
+            content: ''; position: absolute; top: -10px;
+            width: 20px; height: 20px; background: #fff1f2;
+            border-radius: 50%;
+        }
+        .ticket-divider::before { left: -34px; box-shadow: inset -3px 0 3px rgba(0,0,0,0.05); }
+        .ticket-divider::after { right: -34px; box-shadow: inset 3px 0 3px rgba(0,0,0,0.05); }
+
+        /* Stamp Animation */
+        .stamp-claimed {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(2) rotate(-15deg);
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .stamp-claimed.active {
+            transform: translate(-50%, -50%) scale(1) rotate(-15deg);
+            opacity: 1;
+        }
+        
+        /* Ghost Input */
+        .ghost-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(251, 113, 133, 0.5);
+            color: #fff;
+            text-align: center;
+            font-size: 1.5rem;
+            padding-bottom: 0.5rem;
+            transition: all 0.3s;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+        .ghost-input:focus {
+            outline: none;
+            border-bottom-color: #fb7185;
+            box-shadow: 0 10px 20px -10px rgba(251, 113, 133, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-rose-50 text-slate-800 antialiased selection:bg-rose-200">
+
+    <!-- Layar Ketuk Pertama -->
+    <div id="preloader" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-1000" onclick="startExperience()">
+        <div class="animate-pulse flex flex-col items-center">
+            <i data-lucide="mail" class="w-12 h-12 text-rose-400 mb-4 animate-float"></i>
+            <h2 class="serif text-2xl tracking-widest">Ketuk layarnya ya...</h2>
+            <p class="text-sm text-gray-400 mt-2 font-light">Nyalakan suaranya biar lebih asik</p>
+        </div>
+    </div>
+
+    <!-- Reading Progress Bar -->
+    <div class="fixed top-0 left-0 h-1 bg-gradient-to-r from-rose-300 to-rose-500 z-50 transition-all duration-300 shadow-sm" id="progressBar" style="width: 0%;"></div>
+
+    <!-- Background Audio -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/16/audio_db87c69da9.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Floating Audio Control -->
+    <button onclick="toggleMusic()" class="fixed bottom-6 right-6 z-50 bg-white/80 backdrop-blur p-3 rounded-full shadow-lg border border-rose-100 hover:scale-110 transition-transform">
+        <i data-lucide="disc" id="musicIcon" class="w-6 h-6 text-rose-500"></i>
+    </button>
+
+    <!-- Floating Heart Generator -->
+    <button onclick="createHearts(event)" class="fixed top-6 right-6 z-50 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-rose-100 flex items-center gap-2 hover:bg-rose-50 transition-colors">
+        <i data-lucide="sparkles" class="w-4 h-4 text-rose-400"></i>
+        <span class="text-xs font-semibold text-rose-500 tracking-wide">Beri Hati</span>
+    </button>
+
+    <main class="relative w-full overflow-hidden">
+        <!-- Background Ornamen -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none fixed">
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-rose-200/40 rounded-full blur-3xl mix-blend-multiply"></div>
+            <div class="absolute bottom-[20%] left-[-10%] w-80 h-80 bg-blue-200/40 rounded-full blur-3xl mix-blend-multiply"></div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="min-h-screen flex flex-col relative px-6 py-12 justify-center">
+            <!-- Kotak Utama -->
+            <div class="glass max-w-3xl w-full mx-auto rounded-3xl p-8 md:p-14 text-center shadow-2xl relative z-10 reveal active mt-12">
+                <div class="inline-flex items-center justify-center p-3 bg-rose-50/80 text-rose-500 rounded-full mb-6 shadow-inner border border-white">
+                    <i data-lucide="gift" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl text-slate-800 mb-6 leading-tight">
+                    Ada sesuatu <br> <span class="italic text-rose-500 font-light">khusus untukmu.</span>
+                </h1>
+                <p class="text-slate-600 mb-10 max-w-lg mx-auto text-sm md:text-base leading-relaxed">
+                    Aku bingung mau kasih apa, jadi aku buatkan satu tempat kecil di internet ini. Tempat untuk menyimpan cerita kecil kita.
+                </p>
+
+                <!-- Time Counter -->
+                <div class="glass rounded-2xl p-5 inline-block w-full max-w-md mx-auto border-white/60 bg-white/40 shadow-sm">
+                    <p class="text-xs text-rose-500 font-bold mb-3 uppercase tracking-widest flex items-center justify-center gap-2">
+                        <i data-lucide="clock" class="w-3 h-3"></i> Waktu Bersamamu
+                    </p>
+                    <div class="grid grid-cols-4 gap-2 text-center" id="timeCounter">
+                        <!-- JS Will Populate -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Panah Bawah -->
+            <div class="flex flex-col items-center mt-12 z-10">
+                <span class="text-[10px] md:text-xs text-rose-400 mb-3 font-semibold tracking-widest uppercase bg-white/80 px-4 py-1.5 rounded-full backdrop-blur-sm shadow-sm border border-rose-100">Geser ke bawah</span>
+                <a href="#timeline" class="animate-bounce p-4 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-rose-100 text-rose-400 hover:text-white hover:bg-rose-400 transition-all duration-300">
+                    <i data-lucide="arrow-down" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- Jejak Cerita Kita (Timeline) -->
+        <section id="timeline" class="py-24 px-6 relative z-10 bg-white/20 border-t border-white/50">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-800">Jejak Cerita Kita</h2>
+                    <p class="text-slate-500">Mengingat kembali gimana semuanya dimulai.</p>
+                </div>
+                
+                <div class="relative max-w-4xl mx-auto">
+                    <!-- Garis Vertikal -->
+                    <div class="absolute left-[22px] md:left-1/2 top-0 bottom-0 w-1 bg-rose-200 md:-translate-x-1/2 rounded-full opacity-60"></div>
+
+                    <!-- Item 1 (Kiri di Desktop, Kanan di Mobile) -->
+                    <div class="mb-12 flex flex-col md:flex-row justify-between items-center w-full relative reveal">
+                        <!-- Konten Kartu (Kiri) -->
+                        <div class="order-2 md:order-1 w-full md:w-[45%] pl-16 md:pl-0 md:pr-8 md:text-right z-10 mt-2 md:mt-0">
+                            <div class="glass p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md border border-white/80 transition-all group">
+                                <h3 class="text-xl md:text-2xl font-bold text-rose-500 group-hover:text-rose-600 transition-colors">Pertama Kali Kenal</h3>
+                                <p class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3 mt-1 flex items-center md:justify-end gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> 14 Mei 2026</p>
+                                <p class="text-slate-600 text-sm md:text-base leading-relaxed">Awal mula semuanya bermula. Gak nyangka bakal sejauh ini dan seasyik ini.</p>
+                            </div>
+                        </div>
+                        <!-- Titik Waktu (Tengah) -->
+                        <div class="order-1 md:order-2 z-20 w-5 h-5 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full absolute left-[14px] md:left-1/2 transform md:-translate-x-1/2 top-8 md:top-1/2 md:-translate-y-1/2 ring-4 ring-rose-50 border-2 border-white shadow-md"></div>
+                        <!-- Spacer (Kanan) -->
+                        <div class="order-3 hidden md:block md:w-[45%]"></div>
+                    </div>
+
+                    <!-- Item 2 (Kanan di Desktop, Kanan di Mobile) -->
+                    <div class="mb-12 flex flex-col md:flex-row justify-between items-center w-full relative reveal">
+                        <!-- Spacer (Kiri) -->
+                        <div class="order-1 hidden md:block md:w-[45%]"></div>
+                        <!-- Titik Waktu (Tengah) -->
+                        <div class="order-1 md:order-2 z-20 w-5 h-5 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full absolute left-[14px] md:left-1/2 transform md:-translate-x-1/2 top-8 md:top-1/2 md:-translate-y-1/2 ring-4 ring-rose-50 border-2 border-white shadow-md"></div>
+                        <!-- Konten Kartu (Kanan) -->
+                        <div class="order-2 md:order-3 w-full md:w-[45%] pl-16 md:pl-8 z-10 mt-2 md:mt-0">
+                            <div class="glass p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md border border-white/80 transition-all group">
+                                <h3 class="text-xl md:text-2xl font-bold text-rose-500 group-hover:text-rose-600 transition-colors">Mulai Dekat</h3>
+                                <p class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3 mt-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> Bulan-bulan berikutnya</p>
+                                <p class="text-slate-600 text-sm md:text-base leading-relaxed">Mulai nyaman cerita panjang lebar, ngomongin hal random sampai lupa waktu. Momen yang selalu ditunggu.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 (Kiri di Desktop) -->
+                    <div class="mb-12 flex flex-col md:flex-row justify-between items-center w-full relative reveal">
+                        <!-- Konten Kartu (Kiri) -->
+                        <div class="order-2 md:order-1 w-full md:w-[45%] pl-16 md:pl-0 md:pr-8 md:text-right z-10 mt-2 md:mt-0">
+                            <div class="glass p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md border border-white/80 transition-all group">
+                                <h3 class="text-xl md:text-2xl font-bold text-rose-500 group-hover:text-rose-600 transition-colors">Hari Ini</h3>
+                                <p class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3 mt-1 flex items-center md:justify-end gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Sekarang</p>
+                                <p class="text-slate-600 text-sm md:text-base leading-relaxed">Aku cuma mau bilang kalau aku bersyukur kamu ada di sini. Baca pesan ini sampai habis ya!</p>
+                            </div>
+                        </div>
+                        <!-- Titik Waktu (Tengah) -->
+                        <div class="order-1 md:order-2 z-20 w-5 h-5 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full absolute left-[14px] md:left-1/2 transform md:-translate-x-1/2 top-8 md:top-1/2 md:-translate-y-1/2 ring-4 ring-rose-50 border-2 border-white shadow-md animate-pulse"></div>
+                        <!-- Spacer (Kanan) -->
+                        <div class="order-3 hidden md:block md:w-[45%]"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mood Booster -->
+        <section class="py-24 px-6 relative z-10 bg-white/30 border-t border-white/50">
+            <div class="max-w-4xl mx-auto text-center reveal">
+                <h2 class="text-3xl font-bold mb-8 text-slate-800">Gimana Perasaanmu Hari Ini?</h2>
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button onclick="showMoodMessage('sedih')" class="px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full font-medium transition-all hover:-translate-y-1 shadow-sm">Lagi Sedih 🌧️</button>
+                    <button onclick="showMoodMessage('capek')" class="px-6 py-3 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-full font-medium transition-all hover:-translate-y-1 shadow-sm">Lagi Capek 😫</button>
+                    <button onclick="showMoodMessage('insecure')" class="px-6 py-3 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full font-medium transition-all hover:-translate-y-1 shadow-sm">Lagi Insecure 🥺</button>
+                </div>
+                <div id="moodMessage" class="hidden glass p-6 md:p-8 rounded-2xl max-w-2xl mx-auto transform transition-all duration-500 scale-95 border-rose-200">
+                    <p id="moodText" class="text-lg md:text-xl text-slate-700 font-medium leading-relaxed"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ruang Memori Kita (Polaroid Upload) -->
+        <section class="py-24 px-6 relative z-10 border-t border-white/50">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ruang Memori Kita</h2>
+                    <p class="text-gray-500">Klik bingkainya buat masukin foto kita berdua. (Otomatis tersimpan loh!)</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
+                    <!-- Polaroid 1 -->
+                    <div class="reveal transform md:rotate-[-4deg] hover:rotate-0 hover:-translate-y-2 transition-all duration-300">
+                        <div class="glass p-4 pb-12 rounded-lg shadow-xl border border-white/60 relative group cursor-pointer" onclick="triggerUpload('polaroid-1')">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-md rotate-[-2deg] shadow-sm z-10"></div>
+                            <div id="polaroid-1" class="w-full aspect-square bg-slate-100/50 rounded-sm mb-4 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative">
+                                <div id="polaroid-1-content" class="text-center group-hover:scale-110 transition-transform">
+                                    <i data-lucide="camera" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+                                    <span class="text-xs font-semibold text-slate-500">Klik & Upload</span>
+                                </div>
+                            </div>
+                            <p class="handwriting text-2xl text-center text-slate-700 absolute bottom-3 w-full left-0">Momen Pertama</p>
+                        </div>
+                    </div>
+                    <!-- Polaroid 2 -->
+                    <div class="reveal transition-delay-100 transform md:rotate-[2deg] hover:rotate-0 hover:-translate-y-2 transition-all duration-300">
+                        <div class="glass p-4 pb-12 rounded-lg shadow-xl border border-white/60 relative group cursor-pointer" onclick="triggerUpload('polaroid-2')">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-md rotate-[3deg] shadow-sm z-10"></div>
+                            <div id="polaroid-2" class="w-full aspect-square bg-slate-100/50 rounded-sm mb-4 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative">
+                                <div id="polaroid-2-content" class="text-center group-hover:scale-110 transition-transform">
+                                    <i data-lucide="camera" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+                                    <span class="text-xs font-semibold text-slate-500">Klik & Upload</span>
+                                </div>
+                            </div>
+                            <p class="handwriting text-2xl text-center text-slate-700 absolute bottom-3 w-full left-0">Hari Terindah</p>
+                        </div>
+                    </div>
+                    <!-- Polaroid 3 -->
+                    <div class="reveal transition-delay-200 transform md:rotate-[-3deg] hover:rotate-0 hover:-translate-y-2 transition-all duration-300">
+                        <div class="glass p-4 pb-12 rounded-lg shadow-xl border border-white/60 relative group cursor-pointer" onclick="triggerUpload('polaroid-3')">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-md rotate-[1deg] shadow-sm z-10"></div>
+                            <div id="polaroid-3" class="w-full aspect-square bg-slate-100/50 rounded-sm mb-4 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative">
+                                <div id="polaroid-3-content" class="text-center group-hover:scale-110 transition-transform">
+                                    <i data-lucide="camera" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+                                    <span class="text-xs font-semibold text-slate-500">Klik & Upload</span>
+                                </div>
+                            </div>
+                            <p class="handwriting text-2xl text-center text-slate-700 absolute bottom-3 w-full left-0">Favorit Kita</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rak Buku Digital -->
+        <section class="py-24 px-6 relative z-10 bg-amber-50/30 border-t border-amber-100/50">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <div class="inline-flex items-center justify-center p-3 bg-amber-100 text-amber-600 rounded-full mb-4 shadow-inner">
+                        <i data-lucide="library" class="w-6 h-6"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-800">Rak Buku Digital Kita</h2>
+                    <p class="text-gray-500">Tempat nyimpen daftar buku rekomendasi kamu buat aku baca.</p>
+                </div>
+
+                <div class="glass p-4 rounded-3xl shadow-lg border-white/80 bg-white/60 mb-8 flex gap-2 reveal">
+                    <input type="text" id="bookInput" placeholder="Ketik judul buku di sini..." class="w-full bg-transparent border-none outline-none text-slate-700 placeholder-slate-400 px-4 font-medium" onkeypress="handleBookKeyPress(event)">
+                    <button onclick="addBook()" class="bg-amber-400 hover:bg-amber-500 text-white p-3 rounded-2xl shadow-md transition-transform hover:scale-105">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div id="emptyBookState" class="text-center py-8 text-slate-400 italic font-medium reveal">Belum ada buku. Ayo tambahin rekomendasi buku favoritmu!</div>
+                <div id="bookList" class="grid gap-4 reveal">
+                    <!-- JS Will Populate -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Kupon Spesial (Level Dewa UI) -->
+        <section class="py-24 px-6 relative z-10 bg-white/20 border-t border-white/50">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Kupon Spesial Untukmu</h2>
+                    <p class="text-gray-500">Klik untuk klaim. Berlaku seumur hidup, khusus buat kamu.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Kupon 1 -->
+                    <div class="ticket-shape group cursor-pointer reveal" onclick="claimTicket(this)">
+                        <div class="flex h-full">
+                            <div class="w-1/3 bg-rose-400 p-6 flex flex-col items-center justify-center text-white border-r border-rose-300 border-dashed">
+                                <i data-lucide="popcorn" class="w-10 h-10 mb-2 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-xs font-semibold tracking-widest uppercase">TICKET 01</span>
+                            </div>
+                            <div class="w-2/3 p-6 relative flex flex-col justify-center bg-white">
+                                <h3 class="text-xl font-bold text-slate-800 mb-1">Nonton Bareng</h3>
+                                <p class="text-sm text-gray-500">Film apapun yang kamu mau, aku temenin.</p>
+                                <div class="mt-4 pt-4 ticket-divider text-center">
+                                    <span class="text-xs font-medium text-rose-500 bg-rose-50 px-3 py-1 rounded-full klaim-btn">Klaim Sekarang</span>
+                                </div>
+                                <div class="stamp-claimed text-3xl font-black text-rose-600 border-4 border-rose-600 px-4 py-1 rounded-lg bg-white/90 backdrop-blur-sm shadow-xl font-serif">DIKLAIM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kupon 2 -->
+                    <div class="ticket-shape group cursor-pointer reveal transition-delay-100" onclick="claimTicket(this)">
+                        <div class="flex h-full">
+                            <div class="w-1/3 bg-blue-400 p-6 flex flex-col items-center justify-center text-white border-r border-blue-300 border-dashed">
+                                <i data-lucide="ear" class="w-10 h-10 mb-2 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-xs font-semibold tracking-widest uppercase">TICKET 02</span>
+                            </div>
+                            <div class="w-2/3 p-6 relative flex flex-col justify-center bg-white">
+                                <h3 class="text-xl font-bold text-slate-800 mb-1">Teman Cerita</h3>
+                                <p class="text-sm text-gray-500">Dengerin curhatan kamu 24/7 tanpa di-judge.</p>
+                                <div class="mt-4 pt-4 ticket-divider text-center">
+                                    <span class="text-xs font-medium text-blue-500 bg-blue-50 px-3 py-1 rounded-full klaim-btn">Klaim Sekarang</span>
+                                </div>
+                                <div class="stamp-claimed text-3xl font-black text-blue-600 border-4 border-blue-600 px-4 py-1 rounded-lg bg-white/90 backdrop-blur-sm shadow-xl font-serif">DIKLAIM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kupon 3 -->
+                    <div class="ticket-shape group cursor-pointer reveal" onclick="claimTicket(this)">
+                        <div class="flex h-full">
+                            <div class="w-1/3 bg-amber-400 p-6 flex flex-col items-center justify-center text-white border-r border-amber-300 border-dashed">
+                                <i data-lucide="ice-cream" class="w-10 h-10 mb-2 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-xs font-semibold tracking-widest uppercase">TICKET 03</span>
+                            </div>
+                            <div class="w-2/3 p-6 relative flex flex-col justify-center bg-white">
+                                <h3 class="text-xl font-bold text-slate-800 mb-1">Traktir Jajan</h3>
+                                <p class="text-sm text-gray-500">Bebas pilih makanan/minuman favoritmu hari ini!</p>
+                                <div class="mt-4 pt-4 ticket-divider text-center">
+                                    <span class="text-xs font-medium text-amber-500 bg-amber-50 px-3 py-1 rounded-full klaim-btn">Klaim Sekarang</span>
+                                </div>
+                                <div class="stamp-claimed text-3xl font-black text-amber-600 border-4 border-amber-600 px-4 py-1 rounded-lg bg-white/90 backdrop-blur-sm shadow-xl font-serif">DIKLAIM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kupon 4 -->
+                    <div class="ticket-shape group cursor-pointer reveal transition-delay-100" onclick="claimTicket(this)">
+                        <div class="flex h-full">
+                            <div class="w-1/3 bg-purple-400 p-6 flex flex-col items-center justify-center text-white border-r border-purple-300 border-dashed">
+                                <i data-lucide="sparkles" class="w-10 h-10 mb-2 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-xs font-semibold tracking-widest uppercase">TICKET 04</span>
+                            </div>
+                            <div class="w-2/3 p-6 relative flex flex-col justify-center bg-white">
+                                <h3 class="text-xl font-bold text-slate-800 mb-1">Satu Permintaan</h3>
+                                <p class="text-sm text-gray-500">Minta tolong lakuin apa aja (yang masuk akal ya!).</p>
+                                <div class="mt-4 pt-4 ticket-divider text-center">
+                                    <span class="text-xs font-medium text-purple-500 bg-purple-50 px-3 py-1 rounded-full klaim-btn">Klaim Sekarang</span>
+                                </div>
+                                <div class="stamp-claimed text-3xl font-black text-purple-600 border-4 border-purple-600 px-4 py-1 rounded-lg bg-white/90 backdrop-blur-sm shadow-xl font-serif">DIKLAIM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Jurnal Kita -->
+        <section class="py-24 px-6 relative z-10 bg-gradient-to-b from-white/30 to-white/20 border-t border-white/50">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <div class="inline-flex items-center justify-center p-3 bg-teal-50/80 text-teal-500 rounded-full mb-4 shadow-inner border border-white">
+                        <i data-lucide="pen-tool" class="w-6 h-6"></i>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Catatan Kecil Kita</h2>
+                    <p class="text-gray-500 max-w-lg mx-auto">Tempat buat nulis apapun. Cerita hari ini, hal random, atau memori yang mau kamu simpan di sini.</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto reveal">
+                    <!-- Input Jurnal -->
+                    <div class="glass p-4 rounded-3xl shadow-lg border-white/80 bg-white/60 mb-10 transition-all focus-within:shadow-xl focus-within:ring-2 focus-within:ring-teal-200">
+                        <textarea id="noteInput" rows="3" placeholder="Tulis ceritamu di sini... (Tekan Enter untuk kirim, Shift+Enter untuk baris baru)" class="w-full bg-transparent border-none outline-none resize-none text-slate-700 placeholder-slate-400 font-medium p-2" onkeypress="handleNoteKeyPress(event)"></textarea>
+                        <div class="flex justify-end mt-2">
+                            <button onclick="addNote()" class="bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-white px-6 py-2 rounded-full font-semibold shadow-md transition-all transform hover:scale-105 flex items-center gap-2 text-sm">
+                                Simpan Catatan <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Journal List -->
+                    <div id="emptyNoteState" class="text-center py-8 text-slate-400 italic font-medium">Belum ada catatan. Ayo tulis cerita pertamamu hari ini!</div>
+                    <div id="journalList" class="space-y-4">
+                        <!-- JS Will Populate -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Kotak Rahasia (UI Level Dewa Sinematik) -->
+        <section class="py-32 px-6 bg-[#0f172a] text-white border-t border-slate-800 relative overflow-hidden flex flex-col justify-center min-h-screen" id="secretSection">
+            <!-- Animated Background Orbs -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <div class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-rose-500/20 rounded-full blur-[120px] mix-blend-screen animate-spin-slow"></div>
+                <div class="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[130px] mix-blend-screen animate-float"></div>
+            </div>
+
+            <div id="firefliesContainer" class="absolute inset-0 pointer-events-none z-0"></div>
+
+            <!-- Bagian Gembok -->
+            <div class="max-w-2xl mx-auto text-center relative z-10 w-full transition-all duration-700 ease-in-out transform" id="vaultContainer">
+                <!-- Ikon Gembok Bercahaya -->
+                <div class="inline-flex items-center justify-center p-6 bg-white/5 backdrop-blur-xl rounded-full mb-8 shadow-[0_0_40px_rgba(244,63,94,0.15)] border border-white/10 relative">
+                    <div class="absolute inset-0 rounded-full border-2 border-rose-400/30 animate-ping"></div>
+                    <i data-lucide="lock" id="lockIcon" class="w-10 h-10 text-rose-400 transition-colors duration-500"></i>
+                </div>
+                
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-rose-200 to-rose-400 font-serif tracking-wide">Pintu Terakhir</h2>
+                <p class="text-gray-400 mb-12 text-lg">Sebelum membuka pesan utamanya, jawab satu pertanyaan ini:<br> <span class="text-rose-300 font-medium italic mt-2 inline-block">"Siapa orang yang paling manis pas lagi senyum?"</span></p>
+                
+                <div class="flex flex-col items-center justify-center max-w-sm mx-auto space-y-8">
+                    <!-- Ghost Input Minimalis -->
+                    <input type="text" id="passwordInput" placeholder="Ketik jawabanmu..." autocomplete="off" class="ghost-input w-full placeholder-slate-600 focus:placeholder-transparent">
+                    
+                    <!-- Tombol Ajaib -->
+                    <button onclick="checkPassword()" class="group relative px-10 py-4 bg-white/5 backdrop-blur-md border border-rose-400/50 rounded-full text-rose-300 font-semibold tracking-widest uppercase text-sm hover:text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(244,63,94,0.5)] overflow-hidden">
+                        <span class="relative z-10 flex items-center gap-2">Buka Gembok <i data-lucide="key" class="w-4 h-4"></i></span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-rose-500 to-pink-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+                    </button>
+                </div>
+                <!-- Pesan Error -->
+                <p id="passwordError" class="text-rose-400 text-sm mt-6 opacity-0 transition-opacity flex items-center justify-center gap-2 font-medium">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i> Tetot! Salah. Coba pikir-pikir lagi.
+                </p>
+            </div>
+
+            <!-- Surat Bintang (Kaca Premium) -->
+            <div id="secretLetter" class="hidden opacity-0 translate-y-10 transition-all duration-1000 ease-out max-w-3xl mx-auto mt-4 relative z-10 text-left w-full">
+                <!-- Glowing Border Wrap -->
+                <div class="relative p-[1px] rounded-[2rem] overflow-hidden shadow-[0_0_60px_rgba(244,63,94,0.15)] bg-gradient-to-b from-white/20 to-white/5">
+                    <div class="absolute inset-0 bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-rose-500/20 animate-spin-slow blur-xl"></div>
+                    
+                    <!-- Kartu Inti -->
+                    <div class="glass !bg-slate-900/80 !backdrop-blur-2xl p-10 md:p-14 rounded-[2rem] w-full relative z-10 border border-white/10">
+                        <i data-lucide="quote" class="w-12 h-12 text-rose-500/20 absolute top-8 left-8"></i>
+                        
+                        <!-- Teks Ngetik -->
+                        <div class="relative z-10 mt-6 min-h-[250px]">
+                            <span id="typingText" class="text-gray-200 text-lg md:text-xl font-serif leading-relaxed"></span><span id="cursor" class="inline-block w-[3px] h-6 bg-rose-400 ml-1 animate-pulse align-middle hidden"></span>
+                        </div>
+                        
+                        <!-- Tanda Tangan -->
+                        <div id="signatureBlock" class="mt-16 text-right opacity-0 transition-all duration-1000 transform translate-x-8 flex flex-col items-end">
+                            <p class="text-gray-400 text-xs tracking-widest uppercase mb-2">Dari yang selalu mengagumimu,</p>
+                            <p class="handwriting text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-rose-300 to-pink-400 tracking-wider py-2 pr-4">[Tulis Namamu Di Sini]</p>
+                        </div>
+
+                        <!-- Tombol WA Pembatas -->
+                        <div id="waButton" class="mt-14 text-center opacity-0 transition-all duration-1000 translate-y-8">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-slate-600 to-transparent mb-10"></div>
+                            <a href="https://wa.me/6281234567890?text=Hai%2C%20aku%20udah%20baca%20semuanya...%20Makasih%20ya%20%E2%9D%A4%EF%B8%8F" target="_blank" class="inline-flex items-center gap-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white px-10 py-4 rounded-full font-bold shadow-[0_0_30px_rgba(244,63,94,0.3)] hover:shadow-[0_0_50px_rgba(244,63,94,0.5)] hover:scale-105 transition-all duration-300 group ring-2 ring-rose-400/50 ring-offset-2 ring-offset-slate-900">
+                                <i data-lucide="message-circle" class="w-6 h-6 group-hover:animate-bounce"></i>
+                                <span class="tracking-wide">Balas Pesan Ini</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Hidden File Input for Polaroids -->
+    <input type="file" id="imageUploader" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Magic Cursor Trail
+        document.addEventListener('mousemove', function(e) {
+            const dot = document.createElement('div');
+            dot.className = 'magic-cursor';
+            dot.style.left = e.pageX + 'px';
+            dot.style.top = e.pageY + 'px';
+            document.body.appendChild(dot);
+            setTimeout(() => dot.remove(), 1000);
+        });
+
+        // 2. Preloader & Audio
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.4;
+        let isMusicPlaying = false;
+
+        function startExperience() {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(() => { preloader.style.display = 'none'; }, 1000);
+            
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                document.getElementById('musicIcon').classList.add('animate-spin-slow');
+            }).catch(e => console.log("Autoplay ditolak browser"));
+        }
+
+        function toggleMusic() {
+            const icon = document.getElementById('musicIcon');
+            if(isMusicPlaying) {
+                bgMusic.pause();
+                icon.classList.remove('animate-spin-slow');
+                icon.setAttribute('data-lucide', 'disc-3');
+            } else {
+                bgMusic.play();
+                icon.classList.add('animate-spin-slow');
+                icon.setAttribute('data-lucide', 'disc');
+            }
+            isMusicPlaying = !isMusicPlaying;
+            lucide.createIcons();
+        }
+
+        // 3. Time Counter (Set: 14 Mei 2026, 22:34:00)
+        const startDate = new Date("2026-05-14T22:34:00").getTime();
+        
+        function updateTime() {
+            const now = new Date().getTime();
+            const difference = now - startDate;
+
+            if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                document.getElementById("timeCounter").innerHTML = `
+                    <div class="flex flex-col"><span class="text-2xl md:text-3xl font-bold text-slate-800">${days}</span><span class="text-[10px] text-gray-500 uppercase">Hari</span></div>
+                    <div class="flex flex-col"><span class="text-2xl md:text-3xl font-bold text-slate-800">${hours}</span><span class="text-[10px] text-gray-500 uppercase">Jam</span></div>
+                    <div class="flex flex-col"><span class="text-2xl md:text-3xl font-bold text-slate-800">${minutes}</span><span class="text-[10px] text-gray-500 uppercase">Menit</span></div>
+                    <div class="flex flex-col"><span class="text-2xl md:text-3xl font-bold text-slate-800">${seconds}</span><span class="text-[10px] text-gray-500 uppercase">Detik</span></div>
+                `;
+            } else {
+                 document.getElementById("timeCounter").innerHTML = `<div class="col-span-4 text-sm text-gray-500 font-medium">Menunggu waktu itu tiba...</div>`;
+            }
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 4. Scroll Reveal & Progress Bar
+        window.addEventListener('scroll', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            for(let i = 0; i < reveals.length; i++){
+                const windowHeight = window.innerHeight;
+                const elementTop = reveals[i].getBoundingClientRect().top;
+                if(elementTop < windowHeight - 100) {
+                    reveals[i].classList.add('active');
+                }
+            }
+            
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+        });
+
+        // 5. Mood Booster Logic
+        const moodTexts = {
+            sedih: "Nggak apa-apa kalau hari ini rasanya berat. Nangis juga boleh kok. Inget ya, pelangi aja butuh hujan buat muncul. Kamu udah lakuin yang terbaik hari ini! 🌈",
+            capek: "Istirahat dulu yuk? Dunia nggak akan runtuh kok kalau kamu ambil waktu buat napas sebentar. Kamu hebat udah bertahan sejauh ini. 🌻",
+            insecure: "Hei, lihat aku. Kamu itu berharga, manis dengan caramu sendiri, dan nggak ada yang bisa jadi kayak kamu. Jangan biarin pikiran jahat menang ya! ✨"
+        };
+
+        function showMoodMessage(mood) {
+            const box = document.getElementById('moodMessage');
+            const text = document.getElementById('moodText');
+            
+            text.innerHTML = moodTexts[mood];
+            box.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            }, 10);
+            
+            createHearts({ clientX: window.innerWidth/2, clientY: window.innerHeight/2 });
+        }
+
+        // 6. Ticket / Coupon Logic
+        function claimTicket(element) {
+            const btn = element.querySelector('.klaim-btn');
+            const stamp = element.querySelector('.stamp-claimed');
+            
+            if(stamp.classList.contains('active')) return; // Udah diklaim
+
+            btn.innerText = "Sudah Diklaim!";
+            btn.classList.replace('bg-rose-50', 'bg-gray-100');
+            btn.classList.replace('text-rose-500', 'text-gray-400');
+            
+            // Animasi Stamp
+            stamp.classList.add('active');
+
+            // Efek Hati
+            createHearts({ clientX: element.getBoundingClientRect().left + (element.offsetWidth/2), clientY: element.getBoundingClientRect().top + (element.offsetHeight/2) });
+        }
+
+        // 7. Global Hearts Generator
+        function createHearts(e) {
+            for(let i=0; i<5; i++) {
+                const heart = document.createElement('i');
+                heart.setAttribute('data-lucide', 'heart');
+                heart.className = `heart-particle text-rose-${Math.random() > 0.5 ? '400' : '500'} fill-current`;
+                heart.style.left = (e.clientX || window.innerWidth/2) + (Math.random() * 40 - 20) + 'px';
+                heart.style.top = (e.clientY || window.innerHeight/2) + (Math.random() * 40 - 20) + 'px';
+                document.body.appendChild(heart);
+                lucide.createIcons();
+                setTimeout(() => heart.remove(), 2000);
+            }
+        }
+
+        // 8. Kotak Rahasia & Surat Ketik
+        const secretText = "Aku nulis ini buat ngasih tau aja kalau aku seneng banget bisa kenal sama kamu. Di sela-sela hari yang sibuk atau capek, ngobrol sama kamu atau sekadar denger cerita kamu itu selalu jadi bagian favorit aku. Nggak perlu buru-buru, jalanin aja pelan-pelan. Aku cuma mau kamu tau kalau kamu dihargai, kamu itu spesial, dan aku akan selalu ada di sini kalau kamu butuh tempat cerita. Semangat terus ya harinya!";
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.toLowerCase().trim();
+            const errorMsg = document.getElementById('passwordError');
+            const vaultContainer = document.getElementById('vaultContainer');
+            const letter = document.getElementById('secretLetter');
+            const lockIcon = document.getElementById('lockIcon');
+
+            if(input === 'aku' || input === 'aku sendiri' || input === 'namaku' || input === 'saya') {
+                // Animasi Buka Gembok
+                lockIcon.setAttribute('data-lucide', 'unlock');
+                lucide.createIcons();
+                lockIcon.classList.add('text-green-400');
+                lockIcon.classList.remove('text-rose-400');
+                errorMsg.style.opacity = '0';
+                
+                // Transisi Smooth Menghilang & Muncul
+                vaultContainer.classList.add('opacity-0', 'scale-95');
+                
+                setTimeout(() => {
+                    vaultContainer.style.display = 'none';
+                    letter.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        letter.classList.remove('opacity-0', 'translate-y-10');
+                        createFireflies();
+                        typeWriter();
+                    }, 100);
+                }, 700);
+
+            } else {
+                errorMsg.style.opacity = '1';
+                vaultContainer.classList.add('animate-bounce');
+                setTimeout(() => vaultContainer.classList.remove('animate-bounce'), 500);
+            }
+        }
+
+        let charIndex = 0;
+        function typeWriter() {
+            const cursor = document.getElementById('cursor');
+            cursor.classList.remove('hidden');
+            
+            if (charIndex < secretText.length) {
+                document.getElementById("typingText").innerHTML += secretText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 50);
+            } else {
+                cursor.classList.add('hidden');
+                
+                const sig = document.getElementById('signatureBlock');
+                sig.style.opacity = '1';
+                sig.classList.remove('translate-x-8');
+                
+                const wa = document.getElementById('waButton');
+                wa.style.opacity = '1';
+                wa.classList.remove('translate-y-8');
+            }
+        }
+
+        function createFireflies() {
+            const container = document.getElementById('firefliesContainer');
+            for(let j=0; j<25; j++) {
+                let fly = document.createElement('div');
+                fly.className = 'firefly';
+                fly.style.left = Math.random() * 100 + '%';
+                fly.style.top = Math.random() * 100 + '%';
+                fly.style.animationDelay = (Math.random() * 4) + 's';
+                container.appendChild(fly);
+            }
+        }
+
+        // 9. Upload Foto Interaktif (Ruang Memori)
+        let currentPolaroidId = null;
+
+        function triggerUpload(polaroidId) {
+            currentPolaroidId = polaroidId;
+            document.getElementById('imageUploader').click();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageUrl = e.target.result;
+                    applyImageToPolaroid(currentPolaroidId, imageUrl);
+                    localStorage.setItem(currentPolaroidId, imageUrl);
+                }
+                reader.readAsDataURL(file);
+            }
+            event.target.value = ''; 
+        }
+
+        function applyImageToPolaroid(id, imageUrl) {
+            const container = document.getElementById(id);
+            const content = document.getElementById(id + '-content');
+            if(container && content) {
+                container.style.backgroundImage = `url(${imageUrl})`;
+                container.style.backgroundSize = 'cover';
+                container.style.backgroundPosition = 'center';
+                container.classList.remove('border-dashed'); 
+                content.style.display = 'none'; 
+            }
+        }
+
+        // 10. Rak Buku Digital (Local Storage)
+        let savedBooks = JSON.parse(localStorage.getItem('crushBooks')) || [];
+
+        function renderBooks() {
+            const list = document.getElementById('bookList');
+            const emptyState = document.getElementById('emptyBookState');
+            if(!list || !emptyState) return;
+            
+            list.innerHTML = '';
+            
+            if(savedBooks.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                savedBooks.forEach((book, index) => {
+                    list.innerHTML += `
+                        <div class="glass p-4 rounded-2xl flex justify-between items-center bg-white/70 border border-white/80 shadow-sm hover:shadow-md transition-all group hover:-translate-y-1">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-500 shadow-inner">
+                                    <i data-lucide="book" class="w-5 h-5"></i>
+                                </div>
+                                <span class="font-medium text-slate-700">${book}</span>
+                            </div>
+                            <button onclick="removeBook(${index})" class="w-8 h-8 rounded-full bg-rose-50 text-rose-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-100 hover:text-rose-500">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function addBook() {
+            const input = document.getElementById('bookInput');
+            const val = input.value.trim();
+            if(val) {
+                savedBooks.push(val);
+                localStorage.setItem('crushBooks', JSON.stringify(savedBooks));
+                input.value = '';
+                renderBooks();
+                for(let i=0; i<4; i++) {
+                    setTimeout(() => createHearts({ clientX: window.innerWidth/2 + (Math.random()*200-100), clientY: window.innerHeight/2 + (Math.random()*100-50) }), i*150);
+                }
+            }
+        }
+
+        function handleBookKeyPress(e) {
+            if(e.key === 'Enter') addBook();
+        }
+
+        function removeBook(index) {
+            savedBooks.splice(index, 1);
+            localStorage.setItem('crushBooks', JSON.stringify(savedBooks));
+            renderBooks();
+        }
+
+        // 11. Jurnal Kita (Local Storage)
+        let savedNotes = JSON.parse(localStorage.getItem('crushNotes')) || [];
+
+        function renderNotes() {
+            const list = document.getElementById('journalList');
+            const emptyState = document.getElementById('emptyNoteState');
+            if(!list || !emptyState) return;
+            
+            list.innerHTML = '';
+            
+            if(savedNotes.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                savedNotes.forEach((note, index) => {
+                    list.innerHTML += `
+                        <div class="glass p-5 rounded-2xl bg-white/70 border border-white/80 shadow-sm hover:shadow-md transition-all relative group">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-1 rounded-md border border-teal-100 flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="clock" class="w-3 h-3"></i> ${note.date}
+                                </span>
+                                <button onclick="removeNote(${index})" class="w-8 h-8 rounded-full bg-rose-50 text-rose-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-100 hover:text-rose-500 absolute top-4 right-4">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <p class="text-slate-700 whitespace-pre-wrap font-medium leading-relaxed mt-3">${note.text}</p>
+                        </div>
+                    `;
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function addNote() {
+            const input = document.getElementById('noteInput');
+            const val = input.value.trim();
+            if(val) {
+                const now = new Date();
+                const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' };
+                const dateString = now.toLocaleDateString('id-ID', options);
+                
+                savedNotes.unshift({ text: val, date: dateString });
+                localStorage.setItem('crushNotes', JSON.stringify(savedNotes));
+                input.value = '';
+                renderNotes();
+                for(let i=0; i<4; i++) {
+                    setTimeout(() => createHearts({ clientX: window.innerWidth/2 + (Math.random()*200-100), clientY: window.innerHeight/2 + (Math.random()*100-50) }), i*150);
+                }
+            }
+        }
+
+        function handleNoteKeyPress(e) {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addNote();
+            }
+        }
+
+        function removeNote(index) {
+            savedNotes.splice(index, 1);
+            localStorage.setItem('crushNotes', JSON.stringify(savedNotes));
+            renderNotes();
+        }
+
+        // Initialize All Saved Data on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            ['polaroid-1', 'polaroid-2', 'polaroid-3'].forEach(id => {
+                const savedImage = localStorage.getItem(id);
+                if(savedImage) applyImageToPolaroid(id, savedImage);
+            });
+            renderBooks();
+            renderNotes();
+        });
+    </script>
+</body>
+</html>
