@@ -755,8 +755,20 @@ Dari aku yang selalu mengharapkan harimu bahagia`;
             cursor.classList.remove('hidden');
             
             if (charIndex < secretText.length) {
-                document.getElementById("typingText").innerHTML += secretText.charAt(charIndex);
-                charIndex++;
+                // Deteksi jika karakter adalah tag HTML (<br>, <b>, dll)
+                if (secretText.charAt(charIndex) === '<') {
+                    let tagEnd = secretText.indexOf('>', charIndex);
+                    if (tagEnd !== -1) {
+                        document.getElementById("typingText").innerHTML += secretText.substring(charIndex, tagEnd + 1);
+                        charIndex = tagEnd + 1;
+                    } else {
+                        document.getElementById("typingText").innerHTML += secretText.charAt(charIndex);
+                        charIndex++;
+                    }
+                } else {
+                    document.getElementById("typingText").innerHTML += secretText.charAt(charIndex);
+                    charIndex++;
+                }
                 setTimeout(typeWriter, 50);
             } else {
                 cursor.classList.add('hidden');
