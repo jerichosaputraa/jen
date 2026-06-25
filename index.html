@@ -162,6 +162,32 @@
             50% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 30px rgba(244, 63, 94, 0.4); }
         }
         .golden-glow-text { animation: goldenGlow 4s ease-in-out infinite; }
+
+        /* EFEK DEWA FINAL: Rose Petals Fall */
+        .petal {
+            position: fixed; pointer-events: none; z-index: 10000;
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            border-radius: 15px 0 15px 0;
+            opacity: 0.8;
+            animation: fallPetal linear forwards;
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+        }
+        @keyframes fallPetal {
+            0% { transform: translateY(-5vh) rotate(0deg) scale(0); opacity: 0; }
+            10% { opacity: 0.8; scale: 1; }
+            100% { transform: translateY(105vh) rotate(360deg) scale(0.5); opacity: 0; }
+        }
+        
+        /* Floating Promise Alert */
+        .promise-alert {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
+            padding: 2rem; border-radius: 2rem; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.5);
+            z-index: 10001; opacity: 0; visibility: hidden; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid #ffe4e6;
+        }
+        .promise-alert.show { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body class="bg-rose-50 text-slate-800 antialiased selection:bg-rose-200">
@@ -574,7 +600,22 @@
                 </div>
             </div>
         </section>
-        
+
+        <!-- EFEK DEWA FINAL: The Floating Promise -->
+        <section class="py-16 bg-[#0f172a] text-center px-6 relative z-20">
+            <div class="max-w-md mx-auto">
+                <p class="text-slate-400 text-sm tracking-widest uppercase mb-6 opacity-70">Satu hal lagi...</p>
+                <button onclick="triggerPromise(this)" class="group relative bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-full hover:bg-white/10 transition-all duration-500 hover:shadow-[0_0_40px_rgba(244,63,94,0.2)] hover:scale-105 active:scale-95">
+                    <div class="flex items-center justify-center gap-4">
+                        <span class="text-rose-200 font-medium italic group-hover:text-white transition-colors text-lg">Pegang tanganku?</span>
+                        <div class="w-10 h-10 bg-gradient-to-tr from-rose-400 to-pink-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(244,63,94,0.4)] group-hover:animate-pulse">
+                            <i data-lucide="hand-heart" class="w-5 h-5 text-white"></i>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+
         <!-- BAGIAN PENUTUP BARU (DITAMBAH EFEK DEWA) -->
         <footer id="dewaFooter" class="py-32 bg-[#0b0f19] text-center px-6 relative transition-all duration-1000 overflow-hidden">
             <div id="starfallContainer" class="absolute inset-0 pointer-events-none z-0"></div>
@@ -589,6 +630,14 @@
             </div>
         </footer>
     </main>
+
+    <!-- Modal Promise Alert -->
+    <div id="promiseModal" class="promise-alert">
+        <i data-lucide="heart-handshake" class="w-16 h-16 text-rose-500 mx-auto mb-4 animate-bounce"></i>
+        <h3 class="text-2xl font-bold text-slate-800 mb-2 font-serif">Aku Janji.</h3>
+        <p class="text-slate-600 mb-6">Gak akan pergi tanpa kabar lagi. <br>Makasih ya udah mau bertahan.</p>
+        <button onclick="closePromise()" class="bg-rose-50 text-rose-500 font-semibold px-8 py-3 rounded-full hover:bg-rose-100 transition-colors">Aku Pegang Janjinya</button>
+    </div>
 
     <!-- Hidden File Input for Polaroids -->
     <input type="file" id="imageUploader" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
@@ -693,6 +742,45 @@
                 container.appendChild(star);
                 setTimeout(() => star.remove(), 4000);
             }, 150); 
+        }
+
+        // EFEK DEWA FINAL: The Floating Promise Logic
+        function triggerPromise(btn) {
+            // Haptic feedback (getar) di HP jika support
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 200);
+
+            // Munculkan Modal
+            document.getElementById('promiseModal').classList.add('show');
+            
+            // Ledakan Kelopak Bunga (Petals)
+            for(let i=0; i<60; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    
+                    // Ukuran random
+                    const size = Math.random() * 15 + 10;
+                    petal.style.width = size + 'px';
+                    petal.style.height = size + 'px';
+                    
+                    // Posisi random menyebar
+                    petal.style.left = Math.random() * 100 + 'vw';
+                    
+                    // Kecepatan jatuh random
+                    petal.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    
+                    document.body.appendChild(petal);
+                    
+                    setTimeout(() => petal.remove(), 5000);
+                }, i * 50);
+            }
+        }
+
+        function closePromise() {
+            document.getElementById('promiseModal').classList.remove('show');
         }
 
         // 3. Time Counter
